@@ -2,15 +2,18 @@
 
 namespace App\Providers;
 
-use App\Nova\Supplier;
+use App\Http\Controllers\VersionController;
 use App\Nova\Customer;
+use App\Nova\Supplier;
 use App\Nova\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Dashboards\Main;
+use Laravel\Nova\Menu\Color;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
+use Laravel\Nova\Badge;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 
@@ -29,7 +32,9 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
             return [
                 MenuSection::dashboard(Main::class)->icon('chart-bar'),
                 MenuSection::make('Ventas', [
-                    MenuItem::resource(Customer::class),
+                    // Usar el modelo Eloquent para contar los clientes
+                    MenuItem::resource(Customer::class)
+                        ->withBadge(Badge::make(\App\Models\Customer::count() > 0 ? Customer::count() : 'Sin clientes', 'success')),  // Muestra un mensaje si no hay clientes
                 ])->icon('cash')->collapsable(),
                 MenuSection::make('Compras', [
                     MenuItem::resource(Supplier::class),
@@ -52,6 +57,10 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make('Accesos', [
                     MenuItem::resource(User::class),
                 ])->icon('cash')->collapsable(),
+                MenuSection::make('Version')
+                    ->path('/resources/issues/lens/new-issues')
+                    ->withBadge(Badge::make(VersionController::getLatestVersionFromChangelog(), 'success'))
+                    ->icon('document-text')
             ];
         });
 
@@ -117,8 +126,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function tools()
     {
-        return [
-        ];
+        return [];
     }
 
     /**

@@ -2,18 +2,18 @@
 
 namespace Inertia;
 
-use LogicException;
-use Inertia\Ssr\Gateway;
-use ReflectionException;
-use Inertia\Support\Header;
-use Illuminate\Http\Request;
-use Inertia\Ssr\HttpGateway;
-use Illuminate\Routing\Router;
-use Illuminate\View\FileViewFinder;
-use Illuminate\Testing\TestResponse;
-use Inertia\Testing\TestResponseMacros;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Foundation\Testing\TestResponse as LegacyTestResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Testing\TestResponse;
+use Illuminate\View\FileViewFinder;
+use Inertia\Ssr\Gateway;
+use Inertia\Ssr\HttpGateway;
+use Inertia\Support\Header;
+use Inertia\Testing\TestResponseMacros;
+use LogicException;
+use ReflectionException;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -31,6 +31,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->registerRequestMacro();
         $this->registerRouterMacro();
         $this->registerTestingMacros();
+        $this->registerMiddleware();
 
         $this->app->bind('inertia.testing.view-finder', function ($app) {
             return new FileViewFinder(
@@ -93,18 +94,26 @@ class ServiceProvider extends BaseServiceProvider
     protected function registerTestingMacros(): void
     {
         if (class_exists(TestResponse::class)) {
-            TestResponse::mixin(new TestResponseMacros());
+            TestResponse::mixin(new TestResponseMacros);
 
             return;
         }
 
         // Laravel <= 6.0
         if (class_exists(LegacyTestResponse::class)) {
-            LegacyTestResponse::mixin(new TestResponseMacros());
+            LegacyTestResponse::mixin(new TestResponseMacros);
 
             return;
         }
 
         throw new LogicException('Could not detect TestResponse class.');
+    }
+
+    protected function registerMiddleware(): void
+    {
+        $this->app['router']->aliasMiddleware(
+            'inertia.encrypt',
+            EncryptHistoryMiddleware::class
+        );
     }
 }

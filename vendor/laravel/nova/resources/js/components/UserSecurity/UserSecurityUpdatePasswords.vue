@@ -33,9 +33,9 @@
             </div>
 
             <div class="col-span-6 sm:col-span-4">
-              <label class="block mb-2" for="current_password"
-                >Current Password</label
-              >
+              <label class="block mb-2" for="current_password">{{
+                __('Current Password')
+              }}</label>
               <input
                 v-model="form.current_password"
                 id="current_password"
@@ -57,7 +57,9 @@
             </div>
 
             <div class="col-span-6 sm:col-span-4">
-              <label class="block mb-2" for="password">Password</label>
+              <label class="block mb-2" for="password">{{
+                __('Password')
+              }}</label>
               <input
                 v-model="form.password"
                 id="password"
@@ -78,9 +80,9 @@
             </div>
 
             <div class="col-span-6 sm:col-span-4">
-              <label class="block mb-2" for="password_confirmation"
-                >Password Confirmation</label
-              >
+              <label class="block mb-2" for="password_confirmation">{{
+                __('Confirm Password')
+              }}</label>
               <input
                 v-model="form.password_confirmation"
                 id="password_confirmation"

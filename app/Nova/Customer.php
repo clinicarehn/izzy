@@ -12,7 +12,6 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Number;
-use Maatwebsite\LaravelNovaExcel\Actions\DownloadExcel;
 
 class Customer extends Resource
 {
@@ -98,31 +97,34 @@ class Customer extends Resource
                 ->placeholder('Nombre Completo'),
             Number::make('DNI/RTN', 'rtn')
                 ->rules('required', 'digits:14') // Valida que tenga exactamente 14 dígitos
-                ->placeholder('Ingrese el DNI o el RTN'),               
+                ->placeholder('Ingrese el DNI o el RTN'),
             Email::make('Correo electrónico', 'email')
                 ->rules('email', 'max:254')
                 ->sortable()
                 ->placeholder('Correo Electrónico')
                 ->creationRules('unique:customers,email')
                 ->updateRules('unique:customers,email,{{resourceId}}'),
-            Select::make('Pais', 'country_id')                
+            Select::make('Pais', 'country_id')
+                ->searchable()
                 ->options(
                     Country::all()->pluck('name', 'id')->toArray()
                 )
                 ->placeholder('Seleccione un país')
-                ->displayUsingLabels(),        
+                ->displayUsingLabels(),
             Select::make('Departamento', 'departamento_id')
+                ->searchable()
                 ->options(
                     State::all()->pluck('name', 'id')->toArray()
                 )
                 ->placeholder('Seleccione un departamento')
-                ->displayUsingLabels(),            
+                ->displayUsingLabels(),
             Select::make('Municipio', 'municipio_id')
+                ->searchable()
                 ->options(
                     City::all()->pluck('name', 'id')->toArray()
                 )
                 ->placeholder('Seleccione un municipio')
-                ->displayUsingLabels(),        
+                ->displayUsingLabels(),
         ];
     }
 

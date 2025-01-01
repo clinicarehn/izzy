@@ -9,7 +9,7 @@
 }
 
 .tab-group .tab-menu {
-  @apply border-l-gray-200 border-r-gray-200 border-gray-200  relative z-0 divide-x dark:border-gray-700 dark:divide-gray-700 bg-white dark:bg-gray-800 rounded-t-lg border-b mx-auto overflow-x-auto;
+  @apply relative z-0 bg-white dark:bg-gray-800 rounded-t-lg border-b mx-auto overflow-x-auto;
   display: flex; /* Set flex display manually to circumvent tailwind circular dependency */
 }
 

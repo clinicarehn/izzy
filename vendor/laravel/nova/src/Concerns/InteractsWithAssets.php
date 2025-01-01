@@ -116,7 +116,14 @@ trait InteractsWithAssets
     public static function mix(string $name, string $path): static
     {
         $path = rtrim($path, '/');
-        $manifest = File::isDirectory($path) ? join_paths($path, 'mix-manifest.json') : $path;
+        $manifest = null;
+
+        if (File::isDirectory($path)) {
+            $manifest = join_paths($path, 'mix-manifest.json');
+        } else {
+            $manifest = $path;
+            $path = dirname($path);
+        }
 
         if (File::exists($manifest)) {
             collect(File::json($manifest))

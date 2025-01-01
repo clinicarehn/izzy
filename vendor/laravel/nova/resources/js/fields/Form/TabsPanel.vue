@@ -14,21 +14,25 @@
       :class="[panel.showTitle && !panel.showToolbar ? 'mt-3' : '']"
     >
       <TabGroup>
-        <TabList :aria-label="panel.name" class="tab-menu">
+        <TabList
+          :aria-label="panel.name"
+          class="tab-menu divide-x dark:divide-gray-700 border-l-gray-200 border-r-gray-200 border-t-gray-200 border-b-gray-200 dark:border-l-gray-700 dark:border-r-gray-700 dark:border-t-gray-700 dark:border-b-gray-700"
+        >
           <Tab
-            v-for="(tab, index) in sortedTabs(tabs)"
+            v-for="(tab, tabListIndex) in sortedTabs(tabs)"
             as="template"
-            :key="index"
-            v-slot="{ selected }"
+            :key="tabListIndex"
+            v-slot="{ selected, disabled }"
+            :disabled="tab.visibleFieldsForPanel.visibleFieldsCount.value == 0"
           >
             <button
-              :dusk="`${tab.attribute}-tab-trigger`"
               :class="[
                 selected
-                  ? 'active text-primary-500 font-bold border-b-2 border-b-primary-500'
+                  ? 'active text-primary-500 font-bold border-b-2 !border-b-primary-500'
                   : 'text-gray-600 hover:text-gray-800 dark:text-gray-400 hover:dark:text-gray-200',
               ]"
-              class="tab-item border-gray-200"
+              class="tab-item"
+              :dusk="`${tab.attribute}-tab-trigger`"
             >
               <span class="capitalize">{{ tab.meta.name }}</span>
             </button>
@@ -38,21 +42,25 @@
         <TabPanels>
           <KeepAlive>
             <TabPanel
-              v-for="(tab, index) in sortedTabs(tabs)"
-              :key="index"
+              v-for="(tab, tabPanelIndex) in sortedTabs(tabs)"
+              :key="tabPanelIndex"
               :label="tab.name"
               :dusk="`${tab.attribute}-tab-content`"
               :class="[tab.attribute, 'tab fields-tab']"
               :unmount="false"
             >
               <div class="divide-y divide-gray-100 dark:divide-gray-700">
-                <template v-for="(field, index) in tab.fields" :key="index">
+                <template
+                  v-for="(field, fieldIndex) in tab.fields"
+                  :key="fieldIndex"
+                >
                   <component
                     v-if="!field.from"
                     :is="componentName(field)"
                     ref="fields"
                     :class="{
-                      'remove-bottom-border': index === tab.fields.length - 1,
+                      'remove-bottom-border':
+                        fieldIndex === tab.fields.length - 1,
                     }"
                     :errors="validationErrors"
                     :field="field"
@@ -67,6 +75,8 @@
                     :via-resource="viaResource"
                     :via-resource-id="viaResourceId"
                     @field-changed="$emit('field-changed')"
+                    @field-shown="tab.visibleFieldsForPanel.handleFieldShown"
+                    @field-hidden="tab.visibleFieldsForPanel.handleFieldHidden"
                     @file-deleted="$emit('update-last-retrieved-at-timestamp')"
                     @file-upload-started="$emit('file-upload-started')"
                     @file-upload-finished="$emit('file-upload-finished')"
@@ -84,6 +94,8 @@
                     :via-relationship="field.from.viaRelationship"
                     :form-unique-id="relationFormUniqueId"
                     @field-changed="$emit('field-changed')"
+                    @field-shown="tab.visibleFieldsForPanel.handleFieldShown"
+                    @field-hidden="tab.visibleFieldsForPanel.handleFieldHidden"
                     @file-deleted="$emit('update-last-retrieved-at-timestamp')"
                     @file-upload-started="$emit('file-upload-started')"
                     @file-upload-finished="$emit('file-upload-finished')"
@@ -102,11 +114,15 @@
 <script setup>
 import { computed } from 'vue'
 import { mapProps } from '@/mixins'
+import { usePanelVisibility } from '@/composables/usePanelVisibility'
 import { TabGroup, TabList, Tab, TabPanels, TabPanel } from '@headlessui/vue'
+import forEach from 'lodash/forEach'
 import orderBy from 'lodash/orderBy'
 
-defineEmits([
+const emitter = defineEmits([
   'field-changed',
+  'field-shown',
+  'field-hidden',
   'update-last-retrieved-at-timestamp',
   'file-upload-started',
   'file-upload-finished',
@@ -132,10 +148,10 @@ const props = defineProps({
 })
 
 const tabs = computed(() => {
-  return props.panel.fields.reduce((tabs, field) => {
+  const tabs = props.panel.fields.reduce((tabs, field) => {
     if (!(field.tab?.attribute in tabs)) {
       tabs[field.tab.attribute] = {
-        name: field.tab,
+        name: field.tab.name,
         attribute: field.tab.attribute,
         position: field.tab.position,
         init: false,
@@ -143,6 +159,7 @@ const tabs = computed(() => {
         fields: [],
         meta: field.tab.meta,
         classes: 'fields-tab',
+        visibleFieldsForPanel: null,
       }
 
       if (
@@ -162,10 +179,16 @@ const tabs = computed(() => {
 
     return tabs
   }, {})
+
+  forEach(tabs, tab => {
+    tab.visibleFieldsForPanel = usePanelVisibility(tab, emitter)
+  })
+
+  return tabs
 })
 
 function sortedTabs(tabs) {
-  return orderBy(tabs, [c => c.position], ['asc'])
+  return Object.values(orderBy(tabs, [c => c.position], ['asc']))
 }
 
 function componentName(field) {

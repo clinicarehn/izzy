@@ -320,14 +320,12 @@ class PendingFortifyConfiguration
     public function register(?bool $routes = null): void
     {
         if (is_null($routes)) {
-            $routes = transform(app()->getLoadedProviders(), function (array $providers) {
-                return collect($providers)
-                    ->keys()
-                    ->filter(function ($provider) {
-                        return $provider == 'App\\Providers\\FortifyServiceProvider'
-                            || $provider == 'App\\Providers\\JetstreamServiceProvider';
-                    })->isNotEmpty();
-            });
+            $routes = collect([
+                \App\Providers\FortifyServiceProvider::class, // @phpstan-ignore class.notFound
+                \App\Providers\JetstreamServiceProvider::class, // @phpstan-ignore class.notFound
+            ])->map(fn ($provider) => app()->getProvider($provider))
+            ->filter()
+            ->isNotEmpty();
         }
 
         if ($routes === false) {

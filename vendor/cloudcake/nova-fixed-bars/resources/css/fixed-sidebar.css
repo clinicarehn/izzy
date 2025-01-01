@@ -1,0 +1,5 @@
+.w-sidebar {
+    z-index: 50;
+    position: fixed;
+    overflow: hidden;
+}

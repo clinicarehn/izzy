@@ -10,12 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Dashboards\Main;
-use Laravel\Nova\Menu\Color;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Badge;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use Laravel\Fortify\Features;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -65,6 +65,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         });
 
         Nova::withBreadcrumbs();
+        Nova::withoutThemeSwitcher();
 
         Nova::footer(function ($request) {
             return Blade::render('
@@ -78,6 +79,20 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         });
     }
 
+     /**
+     * Register the configurations for Laravel Fortify.
+     */
+    protected function fortify(): void
+    {
+        Nova::fortify()
+            ->features([
+                Features::updatePasswords(),
+                Features::emailVerification(),
+                Features::twoFactorAuthentication(['confirm' => true, 'confirmPassword' => true]),
+            ])
+            ->register();
+    }
+
     /**
      * Register the Nova routes.
      *
@@ -88,6 +103,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         Nova::routes()
             ->withAuthenticationRoutes(default: true)
             ->withPasswordResetRoutes()
+            ->withoutEmailVerificationRoutes()
             ->register();
     }
 
@@ -136,6 +152,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
      */
     public function register()
     {
-        //
+        parent::register();
     }
 }

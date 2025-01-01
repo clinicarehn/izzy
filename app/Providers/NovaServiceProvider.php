@@ -35,32 +35,32 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                     // Usar el modelo Eloquent para contar los clientes
                     MenuItem::resource(Customer::class)
                         ->withBadge(Badge::make(\App\Models\Customer::count() > 0 ? Customer::count() : 'Sin clientes', 'success')),  // Muestra un mensaje si no hay clientes
-                ])->icon('cash')->collapsable(),
+                ])->icon('cash')->collapsedByDefault(),
                 MenuSection::make('Compras', [
                     MenuItem::resource(Supplier::class),
-                ])->icon('shopping-bag')->collapsable(),
+                ])->icon('shopping-bag')->collapsedByDefault(),
                 MenuSection::make('Almacen', [
                     MenuItem::resource(Customer::class),
-                ])->icon('cash')->collapsable(),
+                ])->icon('building-storefront')->collapsedByDefault(),
                 MenuSection::make('Contabilidad', [
                     MenuItem::resource(Customer::class),
-                ])->icon('currency-bangladeshi')->collapsable(),
+                ])->icon('currency-dollar')->collapsedByDefault(),
                 MenuSection::make('Reportes', [
                     MenuItem::resource(Customer::class),
-                ])->icon('document-report')->collapsable(),
+                ])->icon('document-report')->collapsedByDefault(),
                 MenuSection::make('RRHH', [
                     MenuItem::resource(Customer::class),
-                ])->icon('user-group')->collapsable(),
+                ])->icon('user-group')->collapsedByDefault(),
                 MenuSection::make('Configuracion', [
                     MenuItem::resource(Customer::class),
-                ])->icon('adjustments')->collapsable(),
+                ])->icon('adjustments')->collapsedByDefault(),
                 MenuSection::make('Accesos', [
                     MenuItem::resource(User::class),
-                ])->icon('cash')->collapsable(),
+                ])->icon('shield-check')->collapsedByDefault(),
                 MenuSection::make('Version')
-                    ->path('/resources/issues/lens/new-issues')
+                    ->path('#')
                     ->withBadge(Badge::make(VersionController::getLatestVersionFromChangelog(), 'success'))
-                    ->icon('document-text')
+                    ->icon('document-check')
             ];
         });
 

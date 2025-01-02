@@ -65,7 +65,6 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
         });
 
         Nova::withBreadcrumbs();
-        Nova::withoutThemeSwitcher();
 
         Nova::footer(function ($request) {
             return Blade::render('
